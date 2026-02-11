@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Chinese New Year - Elegant Ang Pao</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Kanit:wght@200;300;400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --gold-primary: #d4af37;
+            --gold-light: #fcf6ba;
+            --burgundy: #4a0404;
+            --deep-red: #800000;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: radial-gradient(circle at center, #630a0a 0%, #2a0202 100%);
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .serif-font {
+            font-family: 'Noto Serif Thai', 'Playfair Display', serif;
+        }
+
+        /* Luxury Background Pattern */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("https://www.transparenttextures.com/patterns/padded-little.png");
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Luxury Ang Pao Card */
+        .angpao-container {
+            perspective: 1200px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .angpao-card {
+            position: relative;
+            width: 260px;
+            height: 380px;
+            background: linear-gradient(135deg, #a50b0b 0%, #630a0a 100%);
+            border-radius: 8px;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7), 0 18px 36px -18px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+        }
+
+        .angpao-card::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .angpao-card:hover {
+            transform: translateY(-10px) rotateY(5deg);
+            border-color: var(--gold-primary);
+        }
+
+        .angpao-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 140px;
+            background: #800000;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            border-bottom: 1px solid var(--gold-primary);
+            z-index: 5;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .angpao-open .angpao-flap {
+            transform: rotateX(160deg);
+        }
+
+        .gold-seal-luxury {
+            position: absolute;
+            top: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            z-index: 6;
+            font-family: 'Playfair Display', serif;
+            color: var(--burgundy);
+            font-size: 28px;
+            font-weight: bold;
+            border: 2px solid var(--burgundy);
+        }
+
+        /* Gold Gradient Text */
+        .gold-text {
+            background: linear-gradient(to bottom, #fcf6ba 0%, #d4af37 50%, #aa771c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        #resultModal {
+            display: none;
+            backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .btn-luxury {
+            background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%);
+            color: var(--burgundy);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-luxury::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+
+        .btn-luxury:hover::after {
+            left: 100%;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-6">
+    <div class="bg-pattern"></div>
+
+    <!-- Header Section -->
+    <header class="text-center mb-16 z-10 relative">
+        <div class="mb-4 inline-block">
+            <div class="h-px w-12 bg-gold-primary inline-block align-middle"></div>
+            <span class="mx-4 text-sm tracking-[0.3em] gold-text uppercase font-light">The Grand Celebration</span>
+            <div class="h-px w-12 bg-gold-primary inline-block align-middle"></div>
+        </div>
+        <h1 class="serif-font text-5xl md:text-7xl font-bold mb-6 gold-text">
+            Magnificent Lucky Draw
+        </h1>
+        <p class="text-white/60 text-lg md:text-xl font-light tracking-wide max-w-xl mx-auto">
+            สัมผัสประสบการณ์แห่งความโชคดีในเทศกาลตรุษจีน<br>ผ่านการสุ่มรับรางวัลสุดเอกซ์คลูซีฟจากเรา
+        </p>
+    </header>
+
+    <!-- Ang Pao Interaction -->
+    <div class="angpao-container floating" id="angpaoOpener">
+        <div class="angpao-card" id="angpaoCard">
+            <div class="angpao-flap"></div>
+            <div class="gold-seal-luxury">福</div>
+            
+            <!-- Minimalist Content Inside -->
+            <div class="absolute inset-0 flex flex-col items-center justify-end pb-16 px-6 text-center">
+                <span class="text-[var(--gold-primary)] text-xs tracking-[0.4em] uppercase mb-2">Exclusive Reward</span>
+                <p class="serif-font text-2xl font-bold text-white/90">เปิดเพื่อรับโชค</p>
+                <div class="mt-4 w-12 h-[1px] bg-[var(--gold-primary)] opacity-50"></div>
+            </div>
+
+            <!-- Corner Ornaments -->
+            <div class="absolute top-4 left-4 border-t border-l border-[var(--gold-primary)] w-8 h-8 opacity-40"></div>
+            <div class="absolute top-4 right-4 border-t border-r border-[var(--gold-primary)] w-8 h-8 opacity-40"></div>
+            <div class="absolute bottom-4 left-4 border-b border-l border-[var(--gold-primary)] w-8 h-8 opacity-40"></div>
+            <div class="absolute bottom-4 right-4 border-b border-r border-[var(--gold-primary)] w-8 h-8 opacity-40"></div>
+        </div>
+    </div>
+
+    <!-- Prize Highlights -->
+    <div class="mt-20 z-10 text-center">
+        <div class="flex flex-wrap justify-center gap-6 opacity-60 hover:opacity-100 transition-opacity">
+            <div class="serif-font italic text-sm border-r border-white/20 pr-6">Skin Rejuvenation</div>
+            <div class="serif-font italic text-sm border-r border-white/20 pr-6">Premium Gift Vouchers</div>
+            <div class="serif-font italic text-sm">Luxury Treatments</div>
+        </div>
+    </div>
+
+    <!-- Luxury Result Modal -->
+    <div id="resultModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#fdfcf8] rounded-none p-1 border-2 border-[var(--gold-primary)] max-w-lg w-full relative">
+            <!-- Inner Border -->
+            <div class="border border-[var(--gold-primary)] p-10 text-center bg-white relative">
+                <!-- Decorative Elements -->
+                <div class="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-[var(--gold-primary)]"></div>
+                <div class="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-[var(--gold-primary)]"></div>
+                <div class="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-[var(--gold-primary)]"></div>
+                <div class="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-[var(--gold-primary)]"></div>
+
+                <div class="mb-6">
+                    <p class="serif-font text-[var(--burgundy)] uppercase tracking-[0.3em] text-xs mb-4">Official Certificate</p>
+                    <h3 class="serif-font text-4xl text-[var(--burgundy)] font-bold mb-2">Congratulations</h3>
+                    <div class="h-px w-24 bg-[var(--gold-primary)] mx-auto my-6"></div>
+                    <p class="text-gray-500 font-light mb-2">ท่านได้รับของขวัญสุดพิเศษประจำปี</p>
+                    <h2 id="prizeDisplay" class="serif-font text-3xl md:text-4xl font-bold text-[var(--burgundy)] my-8">รางวัลของคุณ</h2>
+                </div>
+
+                <div class="space-y-4 max-w-xs mx-auto">
+                    <button onclick="closeModal()" class="w-full btn-luxury font-bold py-4 px-8 shadow-xl uppercase tracking-widest text-sm">
+                        Confirm Identity
+                    </button>
+                    <button onclick="closeModal()" class="w-full text-[var(--burgundy)] hover:text-red-700 transition-colors py-2 text-xs uppercase tracking-tighter">
+                        Close
+                    </button>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-gray-100 italic text-[10px] text-gray-400">
+                    * กรุณาแสดงหน้านี้เพื่อรับสิทธิ์ ณ จุดให้บริการของคลินิก
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const prizes = [
+            "LASER รักแร้ 2 ครั้ง",
+            "PICO LASER หน้าใส",
+            "MESO FAT 2 บริเวณ",
+            "ลดน้ำหนัก 1 เข็ม",
+            "PICO LASER ฝ้ากระ",
+            "TREATMENT ช้อนทอง",
+            "GIFT VOUCHER 1,000.-",
+            "GIFT VOUCHER 1,500.-",
+            "GIFT VOUCHER 2,000.-",
+            "GIFT VOUCHER 3,000.-",
+            "MESO ROYAL",
+            "BOTOX หน้าผาก",
+            "MESO CHANEL",
+            "HIFU เหนียง"
+        ];
+
+        const angpaoOpener = document.getElementById('angpaoOpener');
+        const angpaoCard = document.getElementById('angpaoCard');
+        const resultModal = document.getElementById('resultModal');
+        const prizeDisplay = document.getElementById('prizeDisplay');
+
+        let isOpening = false;
+
+        angpaoOpener.addEventListener('click', () => {
+            if (isOpening) return;
+            isOpening = true;
+
+            // Remove floating and add opening effect
+            angpaoOpener.classList.remove('floating');
+            
+            // Step 1: Subtle Premium Vibration
+            angpaoCard.style.transition = 'transform 0.1s';
+            let shakeCount = 0;
+            const shakeInterval = setInterval(() => {
+                const x = (Math.random() - 0.5) * 4;
+                const y = (Math.random() - 0.5) * 4;
+                angpaoCard.style.transform = `translate(${x}px, ${y}px) scale(1.05)`;
+                shakeCount++;
+                if (shakeCount > 10) {
+                    clearInterval(shakeInterval);
+                    openAngpao();
+                }
+            }, 50);
+
+            function openAngpao() {
+                angpaoCard.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                angpaoCard.classList.add('angpao-open');
+                
+                // Fire Luxury Confetti
+                fireLuxuryConfetti();
+
+                // Show Result with Delay
+                setTimeout(() => {
+                    const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+                    prizeDisplay.innerText = randomPrize;
+                    resultModal.style.display = 'flex';
+                }, 800);
+            }
+        });
+
+        function closeModal() {
+            resultModal.style.display = 'none';
+            angpaoCard.classList.remove('angpao-open');
+            angpaoOpener.classList.add('floating');
+            angpaoCard.style.transform = '';
+            isOpening = false;
+        }
+
+        function fireLuxuryConfetti() {
+            const end = Date.now() + (2 * 1000);
+            const colors = ['#d4af37', '#fcf6ba', '#aa771c', '#ffffff'];
+
+            (function frame() {
+                confetti({
+                    particleCount: 2,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: colors
+                });
+                confetti({
+                    particleCount: 2,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: colors
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+    </script>
+</body>
+</html>
