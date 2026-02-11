@@ -130,10 +130,10 @@
             animation: float 4s ease-in-out infinite;
         }
 
-        #resultModal {
+        #resultModal, #claimModal {
             display: none;
             backdrop-filter: blur(12px);
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
         }
 
         .btn-luxury {
@@ -158,6 +158,17 @@
 
         .btn-luxury:hover::after {
             left: 100%;
+        }
+
+        input, select {
+            background-color: #fff9f0 !important;
+            border: 1px solid var(--gold-primary) !important;
+            color: var(--burgundy) !important;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid var(--gold-primary);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
         }
     </style>
 </head>
@@ -214,12 +225,10 @@
         </p>
     </div>
 
-    <!-- Luxury Result Modal -->
+    <!-- Luxury Result Modal (Winning Screen) -->
     <div id="resultModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="bg-[#fdfcf8] rounded-none p-1 border-2 border-[var(--gold-primary)] max-w-lg w-full relative">
-            <!-- Inner Border -->
             <div class="border border-[var(--gold-primary)] p-10 text-center bg-white relative">
-                <!-- Decorative Elements -->
                 <div class="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-[var(--gold-primary)]"></div>
                 <div class="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-[var(--gold-primary)]"></div>
                 <div class="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-[var(--gold-primary)]"></div>
@@ -234,22 +243,56 @@
                 </div>
 
                 <div class="space-y-4 max-w-xs mx-auto">
-                    <button onclick="closeModal()" class="w-full btn-luxury font-bold py-4 px-8 shadow-xl uppercase tracking-widest text-sm">
+                    <button id="openClaimBtn" class="w-full btn-luxury font-bold py-4 px-8 shadow-xl uppercase tracking-widest text-sm">
                         Confirm Identity
                     </button>
-                    <button onclick="closeModal()" class="w-full text-[var(--burgundy)] hover:text-red-700 transition-colors py-2 text-xs uppercase tracking-tighter">
-                        Close
-                    </button>
-                </div>
-                
-                <div class="mt-8 pt-6 border-t border-gray-100 italic text-[10px] text-gray-400">
-                    * กรุณาแสดงหน้านี้เพื่อรับสิทธิ์ ณ จุดให้บริการของคลินิก
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Claim Modal (Form Collection) -->
+    <div id="claimModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#fdfcf8] rounded-none p-1 border-2 border-[var(--gold-primary)] max-w-md w-full relative">
+            <div class="border border-[var(--gold-primary)] p-8 bg-white relative">
+                <h3 class="serif-font text-2xl text-[var(--burgundy)] font-bold mb-6 text-center uppercase tracking-wider">ลงทะเบียนรับสิทธิ์</h3>
+                
+                <form id="claimForm" class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-[var(--burgundy)] uppercase tracking-widest mb-1 ml-1">ชื่อ-นามสกุล</label>
+                        <input type="text" id="custName" required class="w-full px-4 py-3 rounded-md text-sm" placeholder="กรอกชื่อของคุณ">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-[var(--burgundy)] uppercase tracking-widest mb-1 ml-1">เบอร์โทรศัพท์</label>
+                        <input type="tel" id="custPhone" required class="w-full px-4 py-3 rounded-md text-sm" placeholder="08x-xxx-xxxx">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-[var(--burgundy)] uppercase tracking-widest mb-1 ml-1">สาขาที่เข้าใช้บริการ</label>
+                        <select id="custBranch" required class="w-full px-4 py-3 rounded-md text-sm appearance-none cursor-pointer">
+                            <option value="" disabled selected>เลือกสาขา</option>
+                            <option value="เชียงใหม่">เชียงใหม่</option>
+                            <option value="บางใหญ่">บางใหญ่</option>
+                            <option value="ศรีราชา">ศรีราชา</option>
+                            <option value="รามอินทรา">รามอินทรา</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" id="submitBtn" class="w-full btn-luxury font-bold py-4 rounded-md shadow-lg uppercase tracking-widest text-sm">
+                            Submit Information
+                        </button>
+                    </div>
+                </form>
+
+                <p id="formStatus" class="mt-4 text-center text-xs text-gray-500 hidden italic"></p>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // REPLACE WITH YOUR GOOGLE APPS SCRIPT URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+
         const prizes = [
             "LASER รักแร้ 2 ครั้ง",
             "PICO LASER หน้าใส",
@@ -270,27 +313,42 @@
         const angpaoOpener = document.getElementById('angpaoOpener');
         const angpaoCard = document.getElementById('angpaoCard');
         const resultModal = document.getElementById('resultModal');
+        const claimModal = document.getElementById('claimModal');
         const prizeDisplay = document.getElementById('prizeDisplay');
-
+        const claimForm = document.getElementById('claimForm');
+        const openClaimBtn = document.getElementById('openClaimBtn');
+        
         let isOpening = false;
+        let currentPrize = "";
 
         // --- ระบบตรวจสอบการกดซ้ำ ---
         window.addEventListener('load', () => {
             const hasClaimed = localStorage.getItem('florenza_cny_2024_claimed');
             const savedPrize = localStorage.getItem('florenza_cny_2024_prize');
+            const formSubmitted = localStorage.getItem('florenza_cny_2024_submitted');
 
             if (hasClaimed && savedPrize) {
                 isOpening = true;
+                currentPrize = savedPrize;
                 prizeDisplay.innerText = savedPrize;
                 angpaoCard.classList.add('angpao-open');
                 angpaoOpener.classList.remove('floating');
                 
-                setTimeout(() => {
+                // หากเคยสุ่มแล้วแต่ยังไม่ส่งฟอร์ม ให้ขึ้นหน้าผลลัพธ์
+                if (!formSubmitted) {
+                    setTimeout(() => {
+                        resultModal.style.display = 'flex';
+                    }, 500);
+                } else {
+                    // หากส่งฟอร์มเรียบร้อยแล้ว อาจจะแสดงข้อความว่าใช้สิทธิ์ไปแล้ว
+                    prizeDisplay.innerText = "ท่านใช้สิทธิ์สุ่มรางวัลเรียบร้อยแล้ว";
+                    openClaimBtn.style.display = 'none';
                     resultModal.style.display = 'flex';
-                }, 500);
+                }
             }
         });
 
+        // เปิดซองอั่งเปา
         angpaoOpener.addEventListener('click', () => {
             if (isOpening || localStorage.getItem('florenza_cny_2024_claimed')) return;
             
@@ -318,6 +376,7 @@
 
                 setTimeout(() => {
                     const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+                    currentPrize = randomPrize;
                     prizeDisplay.innerText = randomPrize;
                     
                     localStorage.setItem('florenza_cny_2024_claimed', 'true');
@@ -328,9 +387,57 @@
             }
         });
 
-        function closeModal() {
+        // เมื่อกด Confirm Identity เพื่อเปิดหน้ากรอกข้อมูล
+        openClaimBtn.addEventListener('click', () => {
             resultModal.style.display = 'none';
-        }
+            claimModal.style.display = 'flex';
+        });
+
+        // จัดการการส่งข้อมูลฟอร์ม
+        claimForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const statusText = document.getElementById('formStatus');
+            
+            const formData = {
+                timestamp: new Date().toLocaleString('th-TH'),
+                prize: currentPrize,
+                name: document.getElementById('custName').value,
+                phone: document.getElementById('custPhone').value,
+                branch: document.getElementById('custBranch').value
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Sending...";
+            statusText.classList.remove('hidden');
+            statusText.innerText = "กำลังบันทึกข้อมูล...";
+
+            try {
+                // ส่งข้อมูลไปยัง Google Apps Script
+                // หมายเหตุ: ต้องใช้เทคนิค URLSearchParams หรือ JSON ตามโครงสร้างของ GAS ที่ตั้งไว้
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // สำคัญสำหรับ GAS
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                localStorage.setItem('florenza_cny_2024_submitted', 'true');
+                
+                statusText.innerText = "บันทึกข้อมูลสำเร็จ! ขอบคุณที่ร่วมสนุกครับ";
+                submitBtn.innerText = "Submitted Successfully";
+                
+                setTimeout(() => {
+                    claimModal.style.display = 'none';
+                }, 2500);
+
+            } catch (error) {
+                console.error('Error!', error.message);
+                statusText.innerText = "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Information";
+            }
+        });
 
         function fireLuxuryConfetti() {
             const end = Date.now() + (2 * 1000);
