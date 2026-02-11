@@ -27,6 +27,7 @@
             font-family: 'Noto Serif Thai', 'Playfair Display', serif;
         }
 
+        /* Luxury Background Pattern */
         .bg-pattern {
             position: fixed;
             top: 0;
@@ -39,6 +40,7 @@
             z-index: 1;
         }
 
+        /* Luxury Ang Pao Card */
         .angpao-container {
             perspective: 1200px;
             cursor: pointer;
@@ -111,6 +113,7 @@
             border: 2px solid var(--burgundy);
         }
 
+        /* Gold Gradient Text */
         .gold-text {
             background: linear-gradient(to bottom, #fcf6ba 0%, #d4af37 50%, #aa771c 100%);
             -webkit-background-clip: text;
@@ -158,10 +161,11 @@
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-6">
+<body class="flex flex-col items-center justify-center p-6 min-h-screen">
     <div class="bg-pattern"></div>
 
-    <header class="text-center mb-16 z-10 relative">
+    <!-- Header Section -->
+    <header class="text-center mb-12 z-10 relative">
         <div class="mb-4 inline-block">
             <div class="h-px w-12 bg-gold-primary inline-block align-middle"></div>
             <span class="mx-4 text-sm tracking-[0.3em] gold-text uppercase font-light">The Grand Celebration</span>
@@ -175,17 +179,20 @@
         </p>
     </header>
 
+    <!-- Ang Pao Interaction -->
     <div class="angpao-container floating" id="angpaoOpener">
         <div class="angpao-card" id="angpaoCard">
             <div class="angpao-flap"></div>
             <div class="gold-seal-luxury">福</div>
             
+            <!-- Minimalist Content Inside -->
             <div class="absolute inset-0 flex flex-col items-center justify-end pb-16 px-6 text-center">
                 <span class="text-[var(--gold-primary)] text-xs tracking-[0.4em] uppercase mb-2">Exclusive Reward</span>
                 <p class="serif-font text-2xl font-bold text-white/90">เปิดเพื่อรับโชค</p>
                 <div class="mt-4 w-12 h-[1px] bg-[var(--gold-primary)] opacity-50"></div>
             </div>
 
+            <!-- Corner Ornaments -->
             <div class="absolute top-4 left-4 border-t border-l border-[var(--gold-primary)] w-8 h-8 opacity-40"></div>
             <div class="absolute top-4 right-4 border-t border-r border-[var(--gold-primary)] w-8 h-8 opacity-40"></div>
             <div class="absolute bottom-4 left-4 border-b border-l border-[var(--gold-primary)] w-8 h-8 opacity-40"></div>
@@ -193,17 +200,26 @@
         </div>
     </div>
 
-    <div class="mt-20 z-10 text-center">
-        <div class="flex flex-wrap justify-center gap-6 opacity-60 hover:opacity-100 transition-opacity">
+    <!-- Prize Highlights -->
+    <div class="mt-16 z-10 text-center">
+        <div class="flex flex-wrap justify-center gap-6 opacity-60 hover:opacity-100 transition-opacity mb-8">
             <div class="serif-font italic text-sm border-r border-white/20 pr-6">Skin Rejuvenation</div>
             <div class="serif-font italic text-sm border-r border-white/20 pr-6">Premium Gift Vouchers</div>
             <div class="serif-font italic text-sm">Luxury Treatments</div>
         </div>
+        
+        <!-- ข้อความเงื่อนไขขนาดเล็กด้านล่าง -->
+        <p class="text-[10px] tracking-widest text-white/30 uppercase serif-font">
+            เงื่อนไขเป็นไปตามที่บริษัทกำหนด
+        </p>
     </div>
 
+    <!-- Luxury Result Modal -->
     <div id="resultModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="bg-[#fdfcf8] rounded-none p-1 border-2 border-[var(--gold-primary)] max-w-lg w-full relative">
+            <!-- Inner Border -->
             <div class="border border-[var(--gold-primary)] p-10 text-center bg-white relative">
+                <!-- Decorative Elements -->
                 <div class="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-[var(--gold-primary)]"></div>
                 <div class="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-[var(--gold-primary)]"></div>
                 <div class="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-[var(--gold-primary)]"></div>
@@ -258,19 +274,17 @@
 
         let isOpening = false;
 
-        // --- เพิ่มระบบตรวจสอบการกดซ้ำ ---
+        // --- ระบบตรวจสอบการกดซ้ำ ---
         window.addEventListener('load', () => {
             const hasClaimed = localStorage.getItem('florenza_cny_2024_claimed');
             const savedPrize = localStorage.getItem('florenza_cny_2024_prize');
 
             if (hasClaimed && savedPrize) {
-                // ถ้าเคยสุ่มแล้ว ให้แสดงผลทันทีและล็อกสถานะ
                 isOpening = true;
                 prizeDisplay.innerText = savedPrize;
                 angpaoCard.classList.add('angpao-open');
                 angpaoOpener.classList.remove('floating');
                 
-                // ดีเลย์เล็กน้อยเพื่อให้ Animation การเปิดทำงานก่อนแสดง Modal
                 setTimeout(() => {
                     resultModal.style.display = 'flex';
                 }, 500);
@@ -278,13 +292,11 @@
         });
 
         angpaoOpener.addEventListener('click', () => {
-            // เช็คสถานะทั้งตัวแปร และ LocalStorage
             if (isOpening || localStorage.getItem('florenza_cny_2024_claimed')) return;
             
             isOpening = true;
             angpaoOpener.classList.remove('floating');
             
-            // Step 1: Vibration Effect
             angpaoCard.style.transition = 'transform 0.1s';
             let shakeCount = 0;
             const shakeInterval = setInterval(() => {
@@ -308,7 +320,6 @@
                     const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
                     prizeDisplay.innerText = randomPrize;
                     
-                    // บันทึกลง LocalStorage ทันทีที่สุ่มได้
                     localStorage.setItem('florenza_cny_2024_claimed', 'true');
                     localStorage.setItem('florenza_cny_2024_prize', randomPrize);
                     
@@ -319,7 +330,6 @@
 
         function closeModal() {
             resultModal.style.display = 'none';
-            // ไม่เอา isOpening = false ออก เพื่อป้องกันการกดซ้ำหลังจากปิดหน้าจอ
         }
 
         function fireLuxuryConfetti() {
